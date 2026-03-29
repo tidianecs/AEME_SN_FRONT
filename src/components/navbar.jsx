@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Video, MessageSquare, User, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Video, MessageSquare, User, Menu, X, LogOut, ShieldCheck } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { user, logout, isLoading } = useAuth();
+    const { user, logout, isLoading, isAdmin } = useAuth();
 
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -49,6 +49,21 @@ const Navbar = () => {
                                     {item.name}
                                 </Link>
                             ))}
+                            {/* Lien Admin — visible uniquement pour les admins */}
+                            {isAdmin && (
+                                <Link
+                                    to="/admin/users"
+                                    className={clsx(
+                                        'px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors',
+                                        isActive('/admin')
+                                            ? 'bg-[#FFCC00] text-[#003366]'
+                                            : 'hover:bg-[#004080] text-[#FFCC00]'
+                                    )}
+                                >
+                                    <ShieldCheck size={18} />
+                                    Admin
+                                </Link>
+                            )}
                         </div>
                     </div>
 
@@ -58,7 +73,9 @@ const Navbar = () => {
                             <span className="text-sm font-semibold">
                                 {isLoading ? '...' : (user?.fullName ?? 'Utilisateur')}
                             </span>
-                            <span className="text-xs text-gray-300">Energy Manager</span>
+                            <span className="text-xs text-gray-300">
+                                {isAdmin ? 'Administrateur' : 'Energy Manager'}
+                            </span>
                         </div>
                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-[#003366]">
                             <User size={20} />
@@ -104,6 +121,21 @@ const Navbar = () => {
                                 {item.name}
                             </Link>
                         ))}
+                        {isAdmin && (
+                            <Link
+                                to="/admin/users"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={clsx(
+                                    'block px-3 py-2 rounded-md text-base font-medium flex items-center gap-3',
+                                    isActive('/admin')
+                                        ? 'bg-[#003366] text-[#FFCC00]'
+                                        : 'text-[#FFCC00] hover:bg-[#004080]'
+                                )}
+                            >
+                                <ShieldCheck size={20} />
+                                Admin
+                            </Link>
+                        )}
 
                         {/* Mobile Profile */}
                         <div className="border-t border-gray-700 mt-4 pt-4 pb-2">
@@ -116,7 +148,9 @@ const Navbar = () => {
                                         <div className="text-base font-medium text-white">
                                             {isLoading ? '...' : (user?.fullName ?? 'Utilisateur')}
                                         </div>
-                                        <div className="text-sm text-gray-400 mt-1">Energy Manager</div>
+                                        <div className="text-sm text-gray-400 mt-1">
+                                            {isAdmin ? 'Administrateur' : 'Energy Manager'}
+                                        </div>
                                     </div>
                                 </div>
                                 <button

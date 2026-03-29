@@ -17,19 +17,20 @@ export const AuthProvider = ({ children }) => {
       .then((authenticated) => {
         if (authenticated && keycloak.tokenParsed) {
           const parsed = keycloak.tokenParsed;
+          const roles = parsed.realm_access?.roles || [];
           setUser({
             id:        parsed.sub,
             email:     parsed.email,
             firstName: parsed.given_name,
             lastName:  parsed.family_name,
             fullName:  parsed.name,
+            isAdmin:   roles.includes('admin'),
           });
           setToken(keycloak.token);
         }
       })
       .finally(() => setIsLoading(false));
 
-    // Refresh automatique du token toutes les 60s
     const interval = setInterval(() => {
       keycloak.updateToken(30).catch(() => keycloak.logout());
     }, 60000);
@@ -46,6 +47,7 @@ export const AuthProvider = ({ children }) => {
       user,
       token,
       isAuthenticated: !!user,
+      isAdmin: user?.isAdmin ?? false,
       isLoading,
       logout,
     }}>

@@ -9,10 +9,10 @@ import MeetingsList from './pages/meetings/meetingsList';
 import NewMeeting from './pages/meetings/newMeeting';
 import MeetingRoom from './pages/meetings/meetingRoom';
 import Chat from './pages/chat/Chat';
-
+import AdminUsers from './pages/admin/AdminUser';
 
 function App() {
-    const { isLoading } = useAuth();
+    const { isLoading, isAdmin } = useAuth();
 
     if (isLoading) {
         return (
@@ -36,6 +36,11 @@ function App() {
                     <Route path="/meetings/new" element={<NewMeeting />} />
                     <Route path="/meetings/:id" element={<MeetingRoom />} />
                     <Route path="/chat" element={<Chat />} />
+                    {/* Routes admin — redirige si pas admin */}
+                    <Route
+                        path="/admin/users"
+                        element={isAdmin ? <AdminUsers /> : <Navigate to="/dashboard" replace />}
+                    />
                 </Routes>
             </main>
         </div>
