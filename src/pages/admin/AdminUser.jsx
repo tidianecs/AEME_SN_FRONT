@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Trash2, User, UserPlus, ShieldCheck } from 'lucide-react';
-import { getAllUsers, deleteUser, inviteUser } from '../../services/adminService';
+import { getAllUsers, deleteUser, inviteUser, updateMembership } from '../../services/adminService';
 
 const AdminUsers = () => {
     const navigate = useNavigate();
@@ -10,7 +10,7 @@ const AdminUsers = () => {
     const [search, setSearch] = useState('');
     const [showInvite, setShowInvite] = useState(false);
     const [inviteForm, setInviteForm] = useState({
-        email: '', firstName: '', lastName: '', role: 'user'
+        email: '', firstName: '', lastName: '', role: 'user', membershipService: ''
     });
     const [inviteLoading, setInviteLoading] = useState(false);
 
@@ -44,10 +44,24 @@ const AdminUsers = () => {
         if (!inviteForm.email.trim()) return;
         try {
             setInviteLoading(true);
-            await inviteUser(inviteForm);
+            // 1. Crée le user et envoie l'invitation
+            const created = await inviteUser(inviteForm);
+
+            // 2. Si membershipService renseigné, on récupère l'ID et on met à jour
+            if (inviteForm.membershipService.trim()) {
+                // On récupère la liste des users pour avoir l'ID du nouveau user
+                const updatedUsers = await getAllUsers();
+                const newUser = updatedUsers.find(u => u.email === inviteForm.email);
+                if (newUser) {
+                    await updateMembership(newUser.id, inviteForm.membershipService.trim());
+                }
+                setUsers(updatedUsers);
+            } else {
+                fetchUsers();
+            }
+
             setShowInvite(false);
-            setInviteForm({ email: '', firstName: '', lastName: '', role: 'user' });
-            fetchUsers();
+            setInviteForm({ email: '', firstName: '', lastName: '', role: 'user', membershipService: '' });
         } catch (err) {
             alert(err.message);
         } finally {
@@ -57,8 +71,8 @@ const AdminUsers = () => {
 
     const filteredUsers = users.filter(u =>
         u.emailVerified === "true" &&
-        u.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-        u.email?.toLowerCase().includes(search.toLowerCase())
+        (u.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+        u.email?.toLowerCase().includes(search.toLowerCase()))
     );
 
     const RoleBadge = ({ role }) => {
@@ -139,10 +153,26 @@ const AdminUsers = () => {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
                             />
                         </div>
+                        {/* Membership Service — pleine largeur */}
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Membership Service
+                            </label>
+                            <input
+                                type="text"
+                                value={inviteForm.membershipService}
+                                onChange={e => setInviteForm({...inviteForm, membershipService: e.target.value})}
+                                placeholder="ex: SENELEC, ASER, Ministère de l'Énergie..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#003366] text-sm"
+                            />
+                        </div>
                     </div>
                     <div className="flex gap-3 justify-end">
                         <button
-                            onClick={() => setShowInvite(false)}
+                            onClick={() => {
+                                setShowInvite(false);
+                                setInviteForm({ email: '', firstName: '', lastName: '', role: 'user', membershipService: '' });
+                            }}
                             className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
                         >
                             Annuler
@@ -152,7 +182,7 @@ const AdminUsers = () => {
                             disabled={inviteLoading}
                             className="px-4 py-2 text-sm bg-[#003366] text-white rounded-md hover:bg-[#002244] disabled:opacity-50"
                         >
-                            {inviteLoading ? 'Envoi...' : 'Envoyer l\'invitation'}
+                            {inviteLoading ? 'Envoi...' : "Envoyer l'invitation"}
                         </button>
                     </div>
                 </div>
@@ -182,6 +212,7 @@ const AdminUsers = () => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
@@ -201,6 +232,9 @@ const AdminUsers = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {u.email}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {u.membershipService || '—'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <RoleBadge role={u.role} />

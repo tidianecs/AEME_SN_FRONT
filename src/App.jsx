@@ -10,6 +10,7 @@ import NewMeeting from './pages/meetings/newMeeting';
 import MeetingRoom from './pages/meetings/meetingRoom';
 import Chat from './pages/chat/Chat';
 import AdminUsers from './pages/admin/AdminUser';
+import UserProfile from './pages/profile/UserProfile';
 
 function App() {
     const { isLoading, isAdmin } = useAuth();
@@ -36,6 +37,7 @@ function App() {
                     <Route path="/meetings/new" element={<NewMeeting />} />
                     <Route path="/meetings/:id" element={<MeetingRoom />} />
                     <Route path="/chat" element={<Chat />} />
+                    <Route path="/profile" element={<UserProfile />} />
                     {/* Routes admin — redirige si pas admin */}
                     <Route
                         path="/admin/users"

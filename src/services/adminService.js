@@ -59,3 +59,13 @@ export const deleteReportAdmin = async (id) => {
     if (!response.ok) throw new Error('Erreur lors de la suppression');
     return response.json();
 };
+
+export const updateMembership = async (userId, membershipService) => {
+    const response = await fetch(`${API_URL}/admin/users/${userId}/membership`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ membershipService }),
+    });
+    if (!response.ok) throw new Error('Erreur lors de la mise à jour du membership');
+    return response.json();
+};

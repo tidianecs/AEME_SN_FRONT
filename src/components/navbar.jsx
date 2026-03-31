@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Video, MessageSquare, User, Menu, X, LogOut, ShieldCheck } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, FileText, Video, MessageSquare, User, Menu, X, ShieldCheck } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { user, logout, isLoading, isAdmin } = useAuth();
+    const { user, isLoading, isAdmin } = useAuth();
 
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -17,6 +18,12 @@ const Navbar = () => {
     ];
 
     const isActive = (path) => location.pathname.startsWith(path);
+
+    const getInitial = () => {
+        if (user?.firstName) return user.firstName.charAt(0).toUpperCase();
+        if (user?.fullName) return user.fullName.charAt(0).toUpperCase();
+        return '?';
+    };
 
     return (
         <nav className="bg-[#003366] text-white shadow-md">
@@ -49,7 +56,6 @@ const Navbar = () => {
                                     {item.name}
                                 </Link>
                             ))}
-                            {/* Lien Admin — visible uniquement pour les admins */}
                             {isAdmin && (
                                 <Link
                                     to="/admin/users"
@@ -67,25 +73,23 @@ const Navbar = () => {
                         </div>
                     </div>
 
-                    {/* Desktop Profile */}
-                    <div className="hidden md:flex items-center gap-4">
-                        <div className="flex flex-col items-end">
-                            <span className="text-sm font-semibold">
-                                {isLoading ? '...' : (user?.fullName ?? 'Utilisateur')}
-                            </span>
-                            <span className="text-xs text-gray-300">
-                                {isAdmin ? 'Administrateur' : 'Energy Manager'}
-                            </span>
-                        </div>
-                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-[#003366]">
-                            <User size={20} />
-                        </div>
+                    {/* Desktop Profile — cliquable vers /profile */}
+                    <div className="hidden md:flex items-center">
                         <button
-                            onClick={logout}
-                            className="flex items-center gap-1 text-xs text-gray-300 hover:text-red-400 transition-colors"
+                            onClick={() => navigate('/profile')}
+                            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                         >
-                            <LogOut size={16} />
-                            Déconnexion
+                            <div className="flex flex-col items-end">
+                                <span className="text-sm font-semibold">
+                                    {isLoading ? '...' : (user?.fullName ?? 'Utilisateur')}
+                                </span>
+                                <span className="text-xs text-gray-300">
+                                    {isAdmin ? 'Administrateur' : 'Energy Manager'}
+                                </span>
+                            </div>
+                            <div className="h-10 w-10 rounded-full bg-[#FFCC00] flex items-center justify-center text-[#003366] font-bold text-sm">
+                                {isLoading ? <User size={20} /> : getInitial()}
+                            </div>
                         </button>
                     </div>
 
@@ -137,30 +141,24 @@ const Navbar = () => {
                             </Link>
                         )}
 
-                        {/* Mobile Profile */}
+                        {/* Mobile Profile — cliquable vers /profile */}
                         <div className="border-t border-gray-700 mt-4 pt-4 pb-2">
-                            <div className="flex items-center justify-between px-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-[#003366]">
-                                        <User size={20} />
+                            <button
+                                onClick={() => { navigate('/profile'); setIsMobileMenuOpen(false); }}
+                                className="flex items-center gap-3 px-3 w-full"
+                            >
+                                <div className="h-10 w-10 rounded-full bg-[#FFCC00] flex items-center justify-center text-[#003366] font-bold text-sm">
+                                    {isLoading ? <User size={20} /> : getInitial()}
+                                </div>
+                                <div className="text-left">
+                                    <div className="text-base font-medium text-white">
+                                        {isLoading ? '...' : (user?.fullName ?? 'Utilisateur')}
                                     </div>
-                                    <div>
-                                        <div className="text-base font-medium text-white">
-                                            {isLoading ? '...' : (user?.fullName ?? 'Utilisateur')}
-                                        </div>
-                                        <div className="text-sm text-gray-400 mt-1">
-                                            {isAdmin ? 'Administrateur' : 'Energy Manager'}
-                                        </div>
+                                    <div className="text-sm text-gray-400">
+                                        {isAdmin ? 'Administrateur' : 'Energy Manager'}
                                     </div>
                                 </div>
-                                <button
-                                    onClick={logout}
-                                    className="flex items-center gap-1 text-sm text-gray-300 hover:text-red-400 transition-colors"
-                                >
-                                    <LogOut size={16} />
-                                    Déconnexion
-                                </button>
-                            </div>
+                            </button>
                         </div>
                     </div>
                 </div>

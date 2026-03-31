@@ -43,7 +43,7 @@ export const deleteConversation = async (id) => {
 };
 
 export const getUserById = async (userId) => {
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    const response = await fetch(`${API_URL}/auth/users/${userId}`, {
         headers: getAuthHeaders(),
     });
     if (!response.ok) return { fullName: 'Utilisateur' };
