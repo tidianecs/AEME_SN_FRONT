@@ -68,6 +68,7 @@ const MeetingRoom = () => {
                 startWithAudioMuted: false,
                 startWithVideoMuted: false,
                 enableWelcomePage: false,
+                prejoinPageEnabled: false,
             },
             interfaceConfigOverwrite: {
                 SHOW_JITSI_WATERMARK: false,
@@ -82,6 +83,17 @@ const MeetingRoom = () => {
             },
         });
 
+        // Redirige dès que le user quitte — avant que la page JaaS s'affiche
+        api.addEventListener('videoConferenceLeft', async () => {
+            api.dispose();
+            jitsiApiRef.current = null;
+            if (meetingData.createdByUserId === user?.id) {
+                await updateMeetingStatus(id, 'ENDED');
+            }
+            navigate('/meetings');
+        });
+
+        // Fallback
         api.addEventListener('readyToClose', async () => {
             if (meetingData.createdByUserId === user?.id) {
                 await updateMeetingStatus(id, 'ENDED');
