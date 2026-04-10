@@ -22,3 +22,21 @@ export const getBasicInfo = async () => {
     if (!response.ok) throw new Error('Erreur lors du chargement des infos basiques');
     return response.json();
 };
+
+export const updateMyLocation = async (latitude, longitude) => {
+    const response = await fetch(`${API_URL}/me/location`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ latitude: String(latitude), longitude: String(longitude) }),
+    });
+    if (!response.ok) throw new Error('Erreur lors de la mise à jour de la position');
+    return response.json();
+};
+
+export const getAllUsersWithLocation = async () => {
+    const response = await fetch(`${API_URL}/users/locations`, {
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Erreur lors du chargement des positions');
+    return response.json();
+};

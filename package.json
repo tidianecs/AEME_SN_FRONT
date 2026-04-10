@@ -13,9 +13,11 @@
     "@stomp/stompjs": "^7.3.0",
     "clsx": "^2.1.1",
     "keycloak-js": "^26.2.3",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.13.2",
     "sockjs-client": "^1.6.1"
   },
